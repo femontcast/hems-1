@@ -7,7 +7,7 @@ Heat exposure monitoring and alert system HEMS
 
 * [Juan J. Rojas](mailto:juan.rojas@itcr.ac.cr) 
 
-* [Adrián Fonseca](mailto:nicoleprado@estudiantec.cr)
+* [Adrián Gutierrez](mailto:a.gutierrez@itcr.ac.cr)
 
 * [Esteban Cañizales](mailto:esteban2802@estudiantec.cr)
 
