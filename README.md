@@ -9,7 +9,7 @@ Heat exposure monitoring and alert system HEMS
 
 * [Adrián Gutierrez](mailto:a.gutierrez@itcr.ac.cr)
 
-* [Priscilla Alfaro](mailto: priscillalfaro01@gmail.com)
+* [Priscilla Alfaro](mailto:priscillalfaro01@gmail.com)
 
 * [Esteban Cañizales](mailto:esteban2802@estudiantec.cr)
 
