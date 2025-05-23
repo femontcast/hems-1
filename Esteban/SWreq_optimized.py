@@ -14,9 +14,9 @@ def indice_de_sudoracion(temp_aire, temp_globo, temp_bulbo, iclo, carga_metaboli
 
     # Cálculo de la temperatura radiante media
     if velocidad_aire > 0.15:
-        temp_radiante_media = (((temp_globo + 273)**4) + (2.5 * (10**8)) * (velocidad_aire**0.6) * (temp_globo - temp_aire))**0.25 - 273
+        temp_radiante_media = ((((temp_globo + 273)**4)  + (2.5 * (10**8)) * (velocidad_aire**0.6) * (temp_globo - temp_aire))**0.25) - 273
     else:
-        temp_radiante_media = (((temp_globo + 273)**4) + (2.5 * (10**8)) * ((temp_globo - temp_aire)**0.25) * (temp_globo - temp_aire))**0.25 - 273
+        temp_radiante_media = ((((temp_globo + 273)**4) + (0.42 * (10**8)) * ((temp_globo - temp_aire)**0.25) * (temp_globo - temp_aire))**0.25) - 273
     
     presion_saturacion_bulbo = math.exp(16.653 - (4030.18 / (temp_bulbo + 235)))  # (kPa)
     presion_parcial_ambiente = presion_saturacion_bulbo - 0.0667 * (temp_aire - temp_bulbo)  # (kPa)
