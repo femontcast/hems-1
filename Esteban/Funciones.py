@@ -6,7 +6,7 @@ import numpy as np
 
 """Función para el cálculo del índice de sobre carga calorica. (SWreq)"""
 
-def indice_de_sudoracion(temp_aire, temp_globo, temp_bulbo, iclo, carga_metabolica, velocidad_aire, postura, aclimatacion):
+def indice_de_sudoracion(temp_aire, temp_globo, temp_bulbo, iclo, carga_metabolica, velocidad_aire, postura, aclimatacion, conveccion):
     #Definición de constantes
     BOLTZMAN = 5.67 * (10**-8)  # W/((m²)(K**4))
     EMISIVIDAD_PIEL = 0.97
@@ -17,7 +17,7 @@ def indice_de_sudoracion(temp_aire, temp_globo, temp_bulbo, iclo, carga_metaboli
         "Agachado": 0.67
     }
     
-    # Definición del Ar/Ad
+    # Definición del Ar/Adu
     postura_trabajo = postura_trabajo_dict[postura]
     #Pasar la tasa metabolica a W/m2
     carga_metabolica=carga_metabolica/1.7
@@ -35,7 +35,13 @@ def indice_de_sudoracion(temp_aire, temp_globo, temp_bulbo, iclo, carga_metaboli
     
     # Calcular coeficientes y factores de reducción de la vestimenta
     velocidad_aire_relativa = velocidad_aire + (0.0052 * (carga_metabolica - 58))
-    hc = 3.5 + (5.2 * velocidad_aire_relativa)
+    if conveccion == "Natural":
+        hc = 3.5 + (5.2 * velocidad_aire_relativa)
+    else:
+        if velocidad_aire_relativa <= 1:
+            hc = 3.5 + (5.2 * velocidad_aire_relativa)
+        else:
+            hc = 8.7*(velocidad_aire_relativa**0.6)
     hr = (EMISIVIDAD_PIEL * BOLTZMAN * postura_trabajo * (((temp_piel + 273)**4) - ((temp_radiante_media + 273)**4))) / (temp_piel - temp_radiante_media)
     he = 16.7 * hc
     fclo = 1 + (1.970 * iclo)

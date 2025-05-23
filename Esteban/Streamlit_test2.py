@@ -96,6 +96,7 @@ col3,col4=st.columns(2)
 with col3:
     postura = st.selectbox("Selecciona una postura de trabajo", ["De pie", "Sentado", "Agachado"])
     aclimatacion = st.selectbox("¿Los trabajadores están aclimatados?", ["Si", "No"])
+    conveccion = st.selectbox("¿Que tipo de ventilación tiene el área de trabajo?", ["Natural", "Forzada"])
 with col4:
     radiacion_solar = st.selectbox("¿Estan expuestos al sol?", ["Si", "No"])
     capucha = st.selectbox("¿Los trabajadores usan capucha?", ["No", "Si"])
@@ -144,7 +145,7 @@ x_values = np.linspace(100, 600, 500)
 y_aclimatada = curva_aclimatada(x_values)
 y_no_aclimatada = curva_no_aclimatada(x_values)
 # Crear el gráfico
-fig, ax = plt.subplots(figsize=(8, 6))
+fig_1, ax = plt.subplots(figsize=(8, 6))
 # Graficar las curvas
 ax.plot(x_values, y_aclimatada, label="Personas Aclimatadas", color="blue", linewidth=2)
 ax.plot(x_values, y_no_aclimatada, label="Personas No Aclimatadas", color="red", linestyle='--', linewidth=2)
@@ -160,7 +161,7 @@ ax.set_xlim(100, 600)
 ax.set_ylim(15, 45)
 
 # Mostrar gráfico
-st.pyplot(fig)
+st.pyplot(fig_1)
 
 #Compuerta lógica para mostrar métodos de evaluación
 #Si se encuentra en estrés térmico, mostrará el método de evaluación SWreq e ISC, de lo contrario, mostrará Fanger. Fanger aun no se ha agregado.
@@ -170,8 +171,14 @@ if estado == "Estrés Térmico":
     st.write("Ya que el trabajador se encuentra en estrés térmico, se recomienda utilizar el método de evaluación SWreq e ISC")
     #Selección de la vestimenta para el factor clo
     st.write("A continuación se le presentarán una serie de conjuntos de ropa para determinar el valor de clo, esto es necesario para calcular el ISC y SWreq")
+    st.write("Tambien es necesario indicar la altura y peso promedio de los trabajadores")   
+    col5,col6=st.columns(2)
     conjuntos_clo= lista_clo.iloc[:,0].tolist()
-    seleccion_clo= st.selectbox("Seleccione el conjunto que utilizan los trabajadores:",conjuntos_clo)
+    with col5:
+        seleccion_clo= st.selectbox("Seleccione el conjunto que utilizan los trabajadores:",conjuntos_clo)
+    with col6:
+        altura=st.number_input("Altura promedio de los trabajadores (cm)", min_value=0.00, max_value=300.00, value=170.00)
+        peso=st.number_input("Peso promedio de los trabajadores (kg)", min_value=50.00, max_value=150.00, value=70.00)
     iclo=lista_clo[lista_clo["Ropa de trabajo"]==seleccion_clo]["m²·K/W"].iloc[0]
     #SWreq
     # Crear un botón para calcular y mostrar los resultados 
@@ -179,7 +186,7 @@ if estado == "Estrés Térmico":
     if mostrar_swreq:
     
         # Llamar a la función indice de suodración
-        dle_alarma_q, dle_peligro_q, dle_alarma_d, dle_peligro_d = indice_de_sudoracion(temp_aire, temp_globo, temp_bulbo, iclo, carga_metabolica, velocidad_aire, postura, aclimatacion)
+        dle_alarma_q, dle_peligro_q, dle_alarma_d, dle_peligro_d = indice_de_sudoracion(temp_aire, temp_globo, temp_bulbo, iclo, carga_metabolica, velocidad_aire, postura, aclimatacion,conveccion)
        #Pasar DLE a horas y min
        
         #DLE Alarma Q
@@ -209,7 +216,7 @@ if estado == "Estrés Térmico":
     if mostrar_isc:
         st.write("### Resultados ISC")
         #Llamar a la función indice de sudoracion
-        isc,clasificacion_isc, tiempo_exp_per=indice_sobrecarga_calorica(carga_metabolica,velocidad_aire,temp_globo,temp_aire, temp_bulbo,iclo)  
+        isc,clasificacion_isc, tiempo_exp_per=indice_sobrecarga_calorica(carga_metabolica,velocidad_aire,temp_globo,temp_aire, temp_bulbo,iclo,altura,peso)  
         st.write(f"El indice de sobrecarga calórica es: {round(isc,2)} %")
         st.write(f"Clasificación de la sobrecarga calórica:  {clasificacion_isc}")
         horas_exp_isc=int(tiempo_exp_per//60)
@@ -217,7 +224,57 @@ if estado == "Estrés Térmico":
         st.write(f"⏱️ Tiempo de exposición permitido: {horas_exp_isc}h {minutos_exp_isc}min")
         
 if estado== "Discomfort":
-    st.write("### Método de evaluación: Fanger")
-    st.write("Ya que el trabajador no se encuentra en estrés térmico, se recomienda utilizar el método de evaluación Fanger")
-    #Llamar a la función indice de sudoracion
-    st.write("Aun no se ha implementado el método de evaluación Fanger, porfavor vuelva más tarde para poder utilizarlo")        
+    if radiacion_solar== "No":
+        st.write("### Método de evaluación: Fanger")
+        st.write("Ya que el trabajador no se encuentra en estrés térmico, se recomienda utilizar el método de evaluación Fanger")
+        #Llamar a la función Fanger
+        st.write("Aun no se ha implementado el método de evaluación Fanger, porfavor vuelva más tarde para poder utilizarlo")    
+    else: 
+        st.write("No se conoce una metodologia para evaluar discomfort en exteriores")
+    st.write("¿Quiere visualizar cuanto serian los tiempos limites de exposición con las metodologias de estrés térmico? ")
+    mostrar_tiempos_limite=st.selectbox("Seleccione una opción", ["Si", "No"])
+    if mostrar_tiempos_limite== "Si":
+         #Selección de la vestimenta para el factor clo
+        st.write("A continuación se le presentarán una serie de conjuntos de ropa para determinar el valor de clo, esto es necesario para calcular el ISC y SWreq")
+        conjuntos_clo= lista_clo.iloc[:,0].tolist()
+        seleccion_clo= st.selectbox("Seleccione el conjunto que utilizan los trabajadores:",conjuntos_clo)
+        iclo=lista_clo[lista_clo["Ropa de trabajo"]==seleccion_clo]["m²·K/W"].iloc[0]
+        #SWreq
+        mostrar_swreq=st.button("Calcular Índice de sudoración requerida")
+        if mostrar_swreq:
+            # Llamar a la función indice de suodración
+            dle_alarma_q, dle_peligro_q, dle_alarma_d, dle_peligro_d = indice_de_sudoracion(temp_aire, temp_globo, temp_bulbo, iclo, carga_metabolica, velocidad_aire, postura, aclimatacion,conveccion)
+        #Pasar DLE a horas y min
+        
+            #DLE Alarma Q
+            horas_dle_alarma_q=int(dle_alarma_q//60)
+            minutos_dle_alarma_q=int(dle_alarma_q%60)
+            #DLE Peligro Q
+            horas_dle_peligro_q=int(dle_peligro_q//60)
+            minutos_dle_peligro_q=int(dle_peligro_q%60)
+            
+            #DLE Alarma D
+            horas_dle_alarma_d=int(dle_alarma_d//60)
+            minutos_dle_alarma_d=int(dle_alarma_d%60)
+            #DLE Peligro D
+            horas_dle_peligro_d=int(dle_peligro_d//60)
+            minutos_dle_peligro_d=int(dle_peligro_d%60)
+            
+            #Mostrar los resultados
+            st.write("### Resultados SWreq")
+            st.write(f"⏱️ DLE Alarma Q: {horas_dle_alarma_q}h {minutos_dle_alarma_q}min")
+            st.write(f"⏱️ DLE Peligro Q: {horas_dle_peligro_q}h {minutos_dle_peligro_q}min")
+            st.write(f"⏱️ DLE Alarma D: {horas_dle_alarma_d}h {minutos_dle_alarma_d}min")
+            st.write(f"⏱️ DLE Peligro D: {horas_dle_peligro_d}h {minutos_dle_peligro_d}min")
+            
+        #ISC
+        mostrar_isc=st.button("Calcular Índice de Sobrecarga de Calor")
+        if mostrar_isc:
+            st.write("### Resultados ISC")
+            #Llamar a la función indice de sudoracion
+            isc,clasificacion_isc, tiempo_exp_per=indice_sobrecarga_calorica(carga_metabolica,velocidad_aire,temp_globo,temp_aire, temp_bulbo,iclo)  
+            st.write(f"El indice de sobrecarga calórica es: {round(isc,2)} %")
+            st.write(f"Clasificación de la sobrecarga calórica:  {clasificacion_isc}")
+            horas_exp_isc=int(tiempo_exp_per//60)
+            minutos_exp_isc=int(tiempo_exp_per%60)
+            st.write(f"⏱️ Tiempo de exposición permitido: {horas_exp_isc}h {minutos_exp_isc}min")

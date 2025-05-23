@@ -33,7 +33,7 @@ def generar_datos():
         with lock:
             df = pd.concat([df, pd.DataFrame([nuevos_datos])], ignore_index=True)
         
-        time.sleep(30)
+        time.sleep(1)
 
 @app.route('/')
 def home():
@@ -43,7 +43,7 @@ def home():
 def obtener_datos():
     with lock:
         # Convertir últimos 10 registros a formato JSON
-        datos = df.tail(10).to_dict(orient='records')
+        datos = df.to_dict(orient='records')
     return jsonify(datos)
 
 @app.route('/ultima-medicion')
